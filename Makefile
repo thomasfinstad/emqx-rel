@@ -71,17 +71,20 @@ remove-deps:
 remove-build-meta-files:
 	@rm -f data/app.*.config data/vm.*.args rebar.lock
 
-.PHONY: $(PROFILES)
-$(PROFILES:%=%): $(REBAR)
+.PHONY: emqx
+emqx: $(REBAR)
 ifneq ($(OS),Windows_NT)
-	@ln -snf _build/$(@)/lib ./_checkouts
+	ln -snf _build/$(@)/lib ./_checkouts
 endif
-ifneq ($(shell echo $(@) |grep edge),)
-	export EMQX_DESC="EMQ X Edge"
-else
-	export EMQX_DESC="EMQ X Broker"
+	echo "aeee"
+	EMQX_DESC="EMQ X Broker" $(REBAR) as $(@) release
+
+.PHONY: emqx-edge
+emqx-edge: $(REBAR)
+ifneq ($(OS),Windows_NT)
+	ln -snf _build/$(@)/lib ./_checkouts
 endif
-	$(REBAR) as $(@) release
+	EMQX_DESC="EMQ X Edge" $(REBAR) as $(@) release
 
 .PHONY: $(PROFILES:%=build-%)
 $(PROFILES:%=build-%): $(REBAR)
@@ -129,11 +132,6 @@ deps-all: $(REBAR) $(PROFILES:%=deps-%) $(PKG_PROFILES:%=deps-%)
 
 .PHONY: $(PROFILES:%=deps-%) $(PKG_PROFILES:%=deps-%)
 $(PROFILES:%=deps-%) $(PKG_PROFILES:%=deps-%): $(REBAR)
-ifneq ($(shell echo $(@) |grep edge),)
-	export EMQX_DESC="EMQ X Edge"
-else
-	export EMQX_DESC="EMQ X Broker"
-endif
 	$(REBAR) as $(@:deps-%=%) get-deps
 
 include packages.mk

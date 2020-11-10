@@ -7,6 +7,8 @@ COPY . /emqx-rel
 
 WORKDIR /emqx-rel
 
+ENV DEBUG=1
+
 RUN make ${EMQX_NAME}-pkg
 
 RUN /emqx-rel/.ci/build_packages/tests.sh

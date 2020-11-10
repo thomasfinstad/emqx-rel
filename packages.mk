@@ -40,17 +40,19 @@ ifneq ($(OS),Windows_NT)
 	$(REBAR) as $(@:relup-%=%) relup
 endif
 
-.PHONY: $(PROFILES:%=%-tar) $(PKG_PROFILES:%=%-tar)
-$(PROFILES:%=%-tar) $(PKG_PROFILES:%=%-tar): $(REBAR)
+.PHONY: emqx-tar emqx-pkg-tar
+emqx-tar emqx-pkg-tar: $(REBAR)
 ifneq ($(OS),Windows_NT)
 	@ln -snf _build/$(subst -tar,,$(@))/lib ./_checkouts
 endif
-ifneq ($(shell echo $(@) |grep edge),)
-	export EMQX_DESC="EMQ X Edge"
-else
-	export EMQX_DESC="EMQ X Broker"
+	EMQX_DESC="EMQ X Broker" $(REBAR) as $(subst -tar,,$(@)) tar
+
+.PHONY: emqx-edge-tar emqx-edge-pkg-tar
+emqx-edge-tar emqx-edge-pkg-tar: $(REBAR)
+ifneq ($(OS),Windows_NT)
+	@ln -snf _build/$(subst -tar,,$(@))/lib ./_checkouts
 endif
-	$(REBAR) as $(subst -tar,,$(@)) tar
+	EMQX_DESC="EMQ X Edge" $(REBAR) as $(subst -tar,,$(@)) tar
 
 .PHONY: $(PROFILES:%=%-zip)
 $(PROFILES:%=%-zip): $(REBAR)
